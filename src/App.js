@@ -3,7 +3,7 @@ import Graph from "react-graph-vis";
 import React, { useState } from "react";
 
 const DEFAULT_PARAMS = {
-  "model": "text-davinci-003",
+  "model": "gpt-4o",
   "temperature": 0.3,
   "max_tokens": 800,
   "top_p": 1,
@@ -123,7 +123,15 @@ function App() {
       .then(prompt => {
         console.log(prompt)
 
-        const params = { ...DEFAULT_PARAMS, prompt: prompt, stop: "\n" };
+        const params = {
+          ...DEFAULT_PARAMS,
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+        };
 
         const requestOptions = {
           method: 'POST',
@@ -133,7 +141,7 @@ function App() {
           },
           body: JSON.stringify(params)
         };
-        fetch('https://api.openai.com/v1/completions', requestOptions)
+        fetch('https://api.openai.com/v1/chat/completions', requestOptions)
           .then(response => {
             if (!response.ok) {
               switch (response.status) {
@@ -149,7 +157,7 @@ function App() {
           })
           .then((response) => {
             const { choices } = response;
-            const text = choices[0].text;
+            const text = choices[0].message.content;
             console.log(text);
 
             const updates = JSON.parse(text);
